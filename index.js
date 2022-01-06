@@ -22,6 +22,7 @@ let id = "PNX_MANUSCRIPTS990000621610205171-1"
 
 let METADATA_URL = 'https://web.nli.org.il/_layouts/15/NLI.DigitalItemPresentor/Mirador/web.nli.org.il/sites/NLIS/he/_vti_bin/NLI.DigitalItemPresentor/IIIFManifest.svc/GetManifestByDocID/'
 let DOWNLOAD_URL = 'http://rosetta.nli.org.il/delivery/DeliveryManagerServlet?dps_func=stream&dps_pid='
+let THREADS = 10
 
 let promises = []
 let status = {
@@ -81,7 +82,7 @@ async function downloadFile(i, url, path) {
 }
 
 async function processPart(i, url, path) {
-    while (status.active >= 10) {
+    while (status.active >= THREADS) {
         await new Promise((resolve) => {
             setTimeout(() => resolve(), 500)
         })
@@ -122,7 +123,7 @@ async function start(url, folder) {
 
     let data
     try {
-        let data = JSON.parse(await getMetadata(url)).sequences[0].canvases
+        data = JSON.parse(await getMetadata(url)).sequences[0].canvases
     } catch (err) {
         console.error('Error: failed to get data from NLI.')
         console.error(err)
@@ -130,6 +131,10 @@ async function start(url, folder) {
     }
 
 
+    console.log('Start downloading the book:')
+    console.log('    Total pages: ' + data.length)
+    console.log('    Downloading to: ' + folder)
+    console.log('    Use ' + THREADS + ' threads.')
     status.total = data.length
     for (let i in data) {
         let id = data[i].images[0]['@id']
@@ -154,11 +159,12 @@ if (require.main === module) {
             id = arg
         })
         .description('Download books from The National Library of Israel')
-        .version('0.0.1')
+        .version('1.0')
         .option('-o, --output-folder <path>', 'path to the file download', './images_' + id)
-
+        .option('-t, --threads <number>', 'number of parallel downloads', '10')
         .parse(process.argv)
 
+    THREADS = parseInt(program.threads)
     start(METADATA_URL + id, program.outputFolder)
 } else {
     console.log('required as a module')
