@@ -4,9 +4,9 @@ Script that help download a book from The National Library of Israel with concur
 
 ### How to run
 * Install nodejs on your computer
-* go to the terminal/cmd in the project folder
-* run `npm install`
-* run `node index.js --help`
+* Open terminal/cmd in the project folder
+* Run `npm install`
+* Run `node index.js --help`
 
 ### TODO
-* add option to make PDF from the images
+* Add option to make PDF from the images
